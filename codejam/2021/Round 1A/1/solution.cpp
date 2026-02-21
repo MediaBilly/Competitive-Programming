@@ -2,66 +2,72 @@
 
 using namespace std;
 
-int X[100];
-
-int digits(int num) {
-    int ret=0;
-    while (num > 0) {
-        ret++;
-        num/=10;
+void inc(string& num) {
+    int i = num.length() - 1;
+    while (i >= 0 && num[i] == '9') {
+        num[i--] = '0';
     }
-    return ret;
+    if (i >= 0) {
+        num[i]++;
+    } else {
+        num.insert(num.begin(), '0');
+    }
 }
 
-int firstdigit(int num) {
-    while (num >= 10) {
-        num/=10;
+bool gt(string a, string b) {
+    if (a.length() < b.length()) {
+        return false;
+    } else if (a.length() > b.length()) {
+        return true;
     }
-    return num;
+    return a > b;
 }
 
 void solve() {
     int N;
     cin >> N;
-    for (int i = 0; i < N; i++) {
-        cin >> X[i];
-    }
+    string numStr, prevNumStr = "";
     int ans=0;
-    for (int i = 1; i < N; i++) {
-        int num = X[i];
-        int ds = digits(num),ds1=digits(X[i-1]);
-        int newds=0;
-        while (ds < ds1) {
-            num*=10;
-            ds++;
-            newds++;
-            ans++;
-        }
-        if (num <= X[i-1]) {
-            if (firstdigit(X[i-1]) == firstdigit(num)) {
-                if (num != X[i]) {
-                    int lim = 1;
-                    for (int i = 0; i < newds; i++) {
-                        lim *= 10;
-                    }
-                    if (abs(num - X[i-1]) < lim-1) {
-                        num+=abs(num - X[i-1])+1;
-                    } else {
-                        num *=10;
-                        ans++;
-                    }
+    for (int i = 0; i < N; i++) {
+        cin >> numStr;
+        if (i > 0) {
+            if (gt(prevNumStr, numStr) || prevNumStr == numStr) {
+                if (prevNumStr.length() == numStr.length()) {
+                    numStr += "0";
+                    ans += 1;
                 } else {
-                    num *=10;
-                    ans++;
+                    int k = prevNumStr.length() - numStr.length();
+                    string tmpNumStr = numStr;
+                    for (int j=0;j<k;j++) {
+                        tmpNumStr += "0";
+                    }
+                    if (gt(tmpNumStr, prevNumStr)) {
+                        numStr = tmpNumStr;
+                        ans += k;
+                    } else {
+                        tmpNumStr = numStr;
+                        for (int j=0;j<k;j++) {
+                            tmpNumStr += "9";
+                        }
+                        if (!gt(tmpNumStr, prevNumStr)) {
+                            tmpNumStr = numStr;
+                            for (int j=0;j<k+1;j++) {
+                                tmpNumStr += "0";
+                            }
+                            numStr = tmpNumStr;
+                            ans += k+1;
+                        } else {
+                            inc(prevNumStr);
+                            numStr = prevNumStr;
+                            ans += k;
+                        }
+                    }
                 }
-            } else if (firstdigit(X[i-1]) > firstdigit(num)) {
-                num *= 10;
-                ans++;
             }
         }
-        X[i]=num;
+        // cerr << numStr << endl;
+        prevNumStr = numStr;
     }
-    
     cout << ans << endl;
 }
 
